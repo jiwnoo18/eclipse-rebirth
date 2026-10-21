@@ -34,11 +34,19 @@ function init(){
  }
  const cape=new THREE.Mesh(new THREE.ConeGeometry(.42,1.05,7),material(0x432951,.8));cape.position.set(0,.93,.3);cape.rotation.x=-.2;cape.castShadow=true;hero.add(cape);
  const ring=new THREE.Mesh(new THREE.TorusGeometry(.58,.025,6,28),new THREE.MeshBasicMaterial({color:0x65efff}));ring.rotation.x=Math.PI/2;ring.position.y=.06;hero.add(ring);
- sword=new THREE.Group();const blade=new THREE.Mesh(new THREE.BoxGeometry(.105,1.0,.065),new THREE.MeshStandardMaterial({color:0xcceeff,metalness:.92,roughness:.16,emissive:0x278ac0,emissiveIntensity:.65}));blade.position.y=.68;sword.add(blade);const edge=new THREE.Mesh(new THREE.BoxGeometry(.025,.86,.025),new THREE.MeshBasicMaterial({color:0xffffff}));edge.position.set(-.055,.69,-.04);sword.add(edge);const tip=new THREE.Mesh(new THREE.ConeGeometry(.075,.2,4),steel);tip.position.y=1.27;sword.add(tip);const guard=new THREE.Mesh(new THREE.BoxGeometry(.38,.075,.12),material(0xe5bd6a,.3));guard.position.y=.15;sword.add(guard);const grip=new THREE.Mesh(new THREE.CylinderGeometry(.045,.05,.3,8),leather);grip.position.y=-.035;sword.add(grip);sword.position.set(.58,.9,-.13);sword.rotation.z=-.3;hero.add(sword);scene.add(hero);hero.visible=false;
+ sword=new THREE.Group();const blade=new THREE.Mesh(new THREE.BoxGeometry(.105,1.0,.065),new THREE.MeshStandardMaterial({color:0xcceeff,metalness:.92,roughness:.16,emissive:0x278ac0,emissiveIntensity:.65}));blade.position.y=.68;sword.add(blade);const edge=new THREE.Mesh(new THREE.BoxGeometry(.025,.86,.025),new THREE.MeshBasicMaterial({color:0xffffff}));edge.position.set(-.055,.69,-.04);sword.add(edge);const tip=new THREE.Mesh(new THREE.ConeGeometry(.075,.2,4),steel);tip.position.y=1.27;sword.add(tip);const guard=new THREE.Mesh(new THREE.BoxGeometry(.38,.075,.12),material(0xe5bd6a,.3));guard.position.y=.15;sword.add(guard);const grip=new THREE.Mesh(new THREE.CylinderGeometry(.045,.05,.3,8),leather);grip.position.y=-.035;sword.add(grip);sword.position.set(.58,.9,-.13);sword.rotation.z=-.3;hero.add(sword);scene.add(hero);hero.visible=false;hero.visible=false;
  for(let i=0;i<25;i++)spawn((Math.random()-.5)*75,(Math.random()-.5)*75);
  // Camera-mounted forearm and polished fantasy sword for first-person view.
  const fpArm=new THREE.Mesh(new THREE.CapsuleGeometry(.105,.34,4,8),material(0x18243b,.38));fpArm.position.set(.48,-.48,-.72);fpArm.rotation.z=-.55;camera.add(fpArm);
  const fpCuff=new THREE.Mesh(new THREE.CylinderGeometry(.13,.12,.18,10),steel);fpCuff.position.set(.45,-.34,-.69);fpCuff.rotation.z=-.55;camera.add(fpCuff);
+ const fpSword=new THREE.Group();
+ const fpBlade=new THREE.Mesh(new THREE.BoxGeometry(.095,.92,.045),new THREE.MeshStandardMaterial({color:0xb9efff,metalness:.9,roughness:.16,emissive:0x167bc4,emissiveIntensity:.8}));fpBlade.position.y=.54;fpSword.add(fpBlade);
+ const fpEdge=new THREE.Mesh(new THREE.BoxGeometry(.018,.78,.018),new THREE.MeshBasicMaterial({color:0xffffff}));fpEdge.position.set(-.049,.55,-.026);fpSword.add(fpEdge);
+ const fpTip=new THREE.Mesh(new THREE.ConeGeometry(.07,.16,4),steel);fpTip.position.y=1.08;fpSword.add(fpTip);
+ const fpGuard=new THREE.Mesh(new THREE.BoxGeometry(.3,.055,.09),material(0xe8ca82,.25));fpGuard.position.y=.08;fpSword.add(fpGuard);
+ const fpGrip=new THREE.Mesh(new THREE.CylinderGeometry(.035,.04,.25,8),leather);fpGrip.position.y=-.09;fpSword.add(fpGrip);
+ fpSword.position.set(.48,-.52,-.78);fpSword.rotation.set(-.15,0,-.18);camera.add(fpSword);sword=fpSword;
+ const fpArm=new THREE.Mesh(new THREE.CapsuleGeometry(.105,.34,4,8),material(0x18243b,.38));fpArm.position.set(.48,-.48,-.72);fpArm.rotation.z=-.55;camera.add(fpArm);
  const fpSword=new THREE.Group();
  const fpBlade=new THREE.Mesh(new THREE.BoxGeometry(.095,.92,.045),new THREE.MeshStandardMaterial({color:0xb9efff,metalness:.9,roughness:.16,emissive:0x167bc4,emissiveIntensity:.8}));fpBlade.position.y=.54;fpSword.add(fpBlade);
  const fpEdge=new THREE.Mesh(new THREE.BoxGeometry(.018,.78,.018),new THREE.MeshBasicMaterial({color:0xffffff}));fpEdge.position.set(-.049,.55,-.026);fpSword.add(fpEdge);
@@ -99,6 +107,10 @@ function updateHud(){$('stats').textContent='LV '+p.level+' · '+p.form;$('hp').
 $('attack').onclick=()=>strike();$('skill').onclick=()=>strike(true);$('absorb').onclick=()=>say('Essence automatically collects when you approach defeated monsters.');$('evolve').onclick=()=>{renderEvolutions();$('evoPanel').classList.remove('hidden')};$('closeEvo').onclick=()=>$('evoPanel').classList.add('hidden');
 $('play').onclick=()=>{$('start').classList.add('hidden');running=true;say('First-person hunt begins. WASD to move; drag to look.')};
 addEventListener('keydown',e=>{const k=e.key.toLowerCase();keys[k]=true;if([' ','arrowup','arrowdown','arrowleft','arrowright'].includes(k))e.preventDefault();if(e.repeat)return;if(k===' ')strike();if(k==='e')absorb();if(k==='q')strike(true);if(k==='escape')$('evoPanel').classList.add('hidden')});addEventListener('keyup',e=>keys[e.key.toLowerCase()]=false);
+let lookPointer=null,lastLookX=0;
+canvas.addEventListener('pointerdown',e=>{if(e.pointerType==='mouse'&&e.button!==0)return;lookPointer=e.pointerId;lastLookX=e.clientX;});
+canvas.addEventListener('pointermove',e=>{if(lookPointer!==e.pointerId)return;const dx=e.clientX-lastLookX;lastLookX=e.clientX;const a=Math.atan2(aim.x,aim.z)+dx*.006;aim.set(Math.sin(a),0,Math.cos(a));});
+canvas.addEventListener('pointerup',e=>{if(lookPointer===e.pointerId)lookPointer=null;});canvas.addEventListener('pointercancel',()=>lookPointer=null);
 let lookPointer=null,lastLookX=0;
 canvas.addEventListener('pointerdown',e=>{if(e.pointerType==='mouse'&&e.button!==0)return;lookPointer=e.pointerId;lastLookX=e.clientX;});
 canvas.addEventListener('pointermove',e=>{if(lookPointer!==e.pointerId)return;const dx=e.clientX-lastLookX;lastLookX=e.clientX;const a=Math.atan2(aim.x,aim.z)+dx*.006;aim.set(Math.sin(a),0,Math.cos(a));});
