@@ -1,4 +1,4 @@
-import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.161.0/build/three.module.js';
+import * as THREE from 'https://cdnjs.cloudflare.com/ajax/libs/three.js/0.161.0/three.module.min.js';
 const $=id=>document.getElementById(id),canvas=$('world');
 let scene,camera,renderer,clock,hero,terrainMesh,sword,keys={},joy={x:0,y:0},mobs=[],xpOrbs=[],vfx=[],running=false,toastTimer,swing=0,abilityCooldown=0,abilityBuff=0,aim=new THREE.Vector3(0,0,-1);
 const p={x:0,z:0,hp:100,maxHp:100,mp:60,maxMp:60,xp:0,level:1,ess:0,form:'Awakened',path:'',rank:0,damage:25,speed:7};
@@ -131,6 +131,42 @@ const evolution={
 function evolve(key){const e=evolution[key];if(!e)return;if(p.level<e.level){say('Reach level '+e.level+' to unlock '+e.name+'.');return}if(p.ess<e.cost){say('Need '+e.cost+' essence for '+e.name+'.');return}p.ess-=e.cost;p.form=e.name;p.path=key;p.rank++;p.damage+=e.damage;abilityCooldown=0;p.maxHp+=e.hp;p.hp=Math.min(p.maxHp,p.hp+e.hp+25);p.maxMp+=e.mp;p.mp=Math.min(p.maxMp,p.mp+e.mp+20);const aura=new THREE.Mesh(new THREE.TorusGeometry(.8,.045,8,40),new THREE.MeshBasicMaterial({color:e.color,transparent:true,opacity:.85}));aura.rotation.x=Math.PI/2;aura.position.y=.12;hero.add(aura);hero.traverse(o=>{if(o.isMesh&&o.material&&o.material.emissive){o.material.emissive.setHex(e.color);o.material.emissiveIntensity=.18}});$('evoPanel').classList.add('hidden');say('ASCENSION COMPLETE: '+e.name.toUpperCase());$('message').textContent='Evolution path: '+e.name+' · next stage requires level and essence.';updateHud()}
 function renderEvolutions(){const wrap=$('evoChoices');if(!wrap)return;wrap.innerHTML='';const choices=p.rank===0?['demon','angel','hero','assassin','ninja']:[evolution[p.path]?.next].filter(Boolean);if(!choices.length){wrap.innerHTML='<p class="muted">You have reached the final stage of this path. Your legend is complete.</p>';return}for(const key of choices){const e=evolution[key],locked=p.level<e.level||p.ess<e.cost;const b=document.createElement('button');b.className='evo-card';b.style.setProperty('--path-color','#'+e.color.toString(16).padStart(6,'0'));b.innerHTML='<strong>'+e.name+'</strong><span>'+e.desc+'</span><small>LEVEL '+e.level+' · '+e.cost+' ESSENCE</small>'+(p.level<e.level?'<em>Requires level '+e.level+'</em>':p.ess<e.cost?'<em>Need '+e.cost+' essence</em>':'<em>UNLOCKED — ASCEND</em>');b.disabled=locked;b.onclick=()=>evolve(key);wrap.appendChild(b)}}
 
+function strike(){
+ if(!running)return;
+ if(p.mp<2){say('Not enough essence energy.');return}
+ p.mp=Math.max(0,p.mp-2);swing=.42;
+ burstEffect(p.path==='demon'||p.path==='demonpeer'||p.path==='demonking'?0xff4778:0x72eaff,3.5,18);
+ let hits=0;
+ for(const m of mobs){if(m.dead)continue;const d=distance(m);if(d>4.8)continue;
+ const dx=m.x-p.x,dz=m.z-p.z,front=(dx*aim.x+dz*aim.z)/Math.max(.001,d);
+ if(front<-.25)continue;
+ m.hp-=p.damage*(abilityBuff>0?1.5:1);
+ if(m.hp<=0){m.dead=true;dropXP(m);say('Defeated '+m.k.name+'! Absorb its essence.');}
+ else {m.g.position.y+=.08;}
+ hits++;
+ }
+ if(!hits)say('Katana slash! Move closer and face a monster.');
+ updateHud();
+}
+function useClassAbility(){
+ if(!running)return;
+ if(abilityCooldown>0){say('Ability recharging.');return}
+ const cost= p.rank===0?12:18;
+ if(p.mp<cost){say('Not enough MP.');return}
+ p.mp-=cost;abilityCooldown=p.rank===0?5:7;
+ const path=p.path;
+ if(!path){burstEffect(0x65efff,7,45);for(const m of mobs){if(!m.dead&&distance(m)<7){m.hp-=p.damage*1.8;if(m.hp<=0){m.dead=true;dropXP(m)}}}say('ARCANE BURST!');}
+ else if(['assassin','phantom','deathstalker','ninja','shadowmaster','shinobi'].includes(path)){
+  const nearest=mobs.filter(m=>!m.dead).sort((a,b)=>distance(a)-distance(b))[0];
+  if(nearest&&distance(nearest)<15){p.x=nearest.x-aim.x*1.8;p.z=nearest.z-aim.z*1.8;nearest.hp-=p.damage*(path==='deathstalker'?3:2.2);if(nearest.hp<=0){nearest.dead=true;dropXP(nearest)}}
+  burstEffect(evolution[path]?.color||0xb995ff,5,36);say('SHADOW STEP!');
+ }else{
+  abilityBuff=5;burstEffect(evolution[path]?.color||0xffd47a,7,48);
+  for(const m of mobs){if(!m.dead&&distance(m)<7){m.hp-=p.damage*(path.includes('demon')?2.4:1.6);if(m.hp<=0){m.dead=true;dropXP(m)}}}
+  say(path.includes('demon')?'INFERNAL NOVA!':path.includes('angel')||path==='seraph'?'CELESTIAL GRACE!':'ASCENDANT AURA!');
+ }
+ updateHud();
+}
 function updateHud(){$('stats').textContent='LV '+p.level+' · '+p.form;$('hp').style.width=100*p.hp/p.maxHp+'%';$('mp').style.width=100*p.mp/p.maxMp+'%';$('xp').style.width=100*p.xp/(p.level*55)+'%';$('expText').textContent='EXP '+p.xp+' / '+p.level*55;$('essText').textContent=p.ess+' essence';$('quest').textContent=mobs.some(m=>m.dead)?'Essence Awaits':'First Hunt';$('zone').textContent=Math.hypot(p.x,p.z)>35?'THE OUTER WILDS':'THE VERDANT EXPANSE';$('evolve').textContent=p.ess>=35?'⬆ Evolve ✧':'⬆ Evolve';$('skill').textContent=p.rank===0?'✦ Burst':({'demon':'☄ Infernal Nova','demonpeer':'☄ Infernal Nova+','demonking':'☄ Cataclysm','angel':'✧ Celestial Grace','archangel':'✧ Radiant Grace','seraph':'✧ Seraphic Dawn','hero':'◈ Heroic Aegis','saint':'◈ Saint Aegis','legend':'◈ Legend Guard','assassin':'➤ Phantom Step','phantom':'➤ Phantom Step+','deathstalker':'➤ Deathstrike','ninja':'影 Shadow Shift','shadowmaster':'影 Shadow Shift+','shinobi':'影 Shinobi Flash'}[p.path]||'✦ Class Ability')+(abilityCooldown>0?' '+abilityCooldown.toFixed(0)+'s':'')}
 $('attack').onclick=()=>strike();$('skill').onclick=()=>useClassAbility();$('absorb').onclick=()=>say('Essence automatically collects when you approach defeated monsters.');$('evolve').onclick=()=>{renderEvolutions();$('evoPanel').classList.remove('hidden')};$('closeEvo').onclick=()=>$('evoPanel').classList.add('hidden');
 $('play').onclick=()=>{$('start').classList.add('hidden');running=true;say('First-person hunt begins. WASD to move; drag to look.')};
