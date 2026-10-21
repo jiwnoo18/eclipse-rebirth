@@ -17,3 +17,5 @@ button:hover:not(:disabled){filter:brightness(1.2);border-color:var(--cyan)}
 .evo-card em{font-style:normal;font-size:10px;color:#a8b8d8;margin-top:auto}
 .evo-card:disabled{opacity:.62;cursor:not-allowed;filter:saturate(.55)}
 @media(max-width:560px){.evo-dialog{padding:17px}.evo-choices{grid-template-columns:1fr 1fr;gap:7px}.evo-card{padding:11px;min-height:145px}.evo-card strong{font-size:14px}.evo-card span{font-size:11px}.path-track{gap:7px;font-size:9px}}
+
+#world{cursor:crosshair}.bar{box-shadow:inset 0 1px 3px #0008}button{backdrop-filter:blur(8px)}
