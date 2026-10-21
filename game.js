@@ -1,6 +1,6 @@
 let THREE;
 try { THREE = await import('https://cdn.jsdelivr.net/npm/three@0.161.0/build/three.module.js'); }
-catch (firstError) { try { THREE = await import('https://unpkg.com/three@0.161.0/build/three.module.js'); } catch (secondError) { window.__ECLIPSE_BOOT_ERROR = 'Could not download the 3D engine from either CDN. Check your connection, disable script-blocking extensions, and reload.'; throw secondError; } }
+catch (firstError) { try { THREE = await import('https://unpkg.com/three@0.161.0/build/three.module.js'); } catch (secondError) { try { THREE = await import('https://raw.githubusercontent.com/mrdoob/three.js/r161/build/three.module.js'); } catch (thirdError) { window.__ECLIPSE_BOOT_ERROR = 'Could not load Three.js from jsDelivr, unpkg, or GitHub. Your network or an extension may be blocking these hosts. Details: ' + (thirdError && thirdError.message ? thirdError.message : 'module download failed'); console.error('ECLIPSE engine load failed', firstError, secondError, thirdError); throw thirdError; } } }
 window.__ECLIPSE_MODULE_LOADED = true;
 const $=id=>document.getElementById(id),canvas=$('world');
 let scene,camera,renderer,clock,hero,terrainMesh,sword,keys={},joy={x:0,y:0},mobs=[],xpOrbs=[],vfx=[],running=false,toastTimer,swing=0,abilityCooldown=0,abilityBuff=0,aim=new THREE.Vector3(0,0,-1);
