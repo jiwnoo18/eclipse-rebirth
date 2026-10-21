@@ -163,10 +163,10 @@ addEventListener('keydown',e=>{const k=e.key.toLowerCase();keys[k]=true;if([' ',
 let lookPointer=null,lastLookX=0,lastLookY=0,yaw=Math.PI,pitch=0,mouseHeld=false;
 function applyLook(dx,dy){yaw-=dx*.003;pitch=THREE.MathUtils.clamp(pitch-dy*.0026,-.75,.75);aim.set(Math.sin(yaw)*Math.cos(pitch),Math.sin(pitch),Math.cos(yaw)*Math.cos(pitch));}
 function requestLookLock(){if(!running||!canvas.requestPointerLock)return;try{const q=canvas.requestPointerLock();if(q&&q.catch)q.catch(()=>{})}catch(e){}}
-canvas.addEventListener('click',requestLookLock);
+canvas.addEventListener('click',requestLookLock);canvas.addEventListener('contextmenu',e=>e.preventDefault());
 canvas.addEventListener('mousedown',e=>{if(e.button===0){mouseHeld=true;lastLookX=e.clientX;lastLookY=e.clientY;requestLookLock()}});
 document.addEventListener('mouseup',()=>{mouseHeld=false;lookPointer=null});
-document.addEventListener('mousemove',e=>{if(document.pointerLockElement===canvas){applyLook(e.movementX||0,e.movementY||0);return}if(mouseHeld){applyLook(e.clientX-lastLookX,e.clientY-lastLookY);lastLookX=e.clientX;lastLookY=e.clientY}});
+canvas.addEventListener('mouseenter',e=>{lastLookX=e.clientX;lastLookY=e.clientY});document.addEventListener('mousemove',e=>{if(document.pointerLockElement===canvas){applyLook(e.movementX||0,e.movementY||0);return}const r=canvas.getBoundingClientRect(),overCanvas=e.clientX>=r.left&&e.clientX<=r.right&&e.clientY>=r.top&&e.clientY<=r.bottom;if(overCanvas&&!mouseHeld){if(lastLookX!==0||lastLookY!==0)applyLook(e.clientX-lastLookX,e.clientY-lastLookY);lastLookX=e.clientX;lastLookY=e.clientY;return}if(mouseHeld){applyLook(e.clientX-lastLookX,e.clientY-lastLookY);lastLookX=e.clientX;lastLookY=e.clientY}else{lastLookX=e.clientX;lastLookY=e.clientY}});
 canvas.addEventListener('pointerdown',e=>{if(e.pointerType!=='mouse'){lookPointer=e.pointerId;lastLookX=e.clientX;lastLookY=e.clientY;if(canvas.setPointerCapture)canvas.setPointerCapture(e.pointerId)}});
 canvas.addEventListener('pointermove',e=>{if(e.pointerType==='mouse'||lookPointer!==e.pointerId||document.pointerLockElement===canvas)return;const dx=e.clientX-lastLookX,dy=e.clientY-lastLookY;lastLookX=e.clientX;lastLookY=e.clientY;applyLook(dx,dy)});
 function endLook(e){if(lookPointer===e.pointerId)lookPointer=null}
