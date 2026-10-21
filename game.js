@@ -60,8 +60,8 @@ function init(){
  const katanaBlade=new THREE.Mesh(new THREE.ShapeGeometry(bladeShape,12),bladeMat);katanaBlade.position.set(0,0,-.015);katanaBlade.renderOrder=34;fpSword.add(katanaBlade);
  const spine=new THREE.Mesh(new THREE.BoxGeometry(.025,1.12,.025),new THREE.MeshBasicMaterial({color:0xffffff,depthTest:false}));spine.position.set(.045,.62,-.025);spine.renderOrder=35;fpSword.add(spine);
  const fpTip=new THREE.Mesh(new THREE.ConeGeometry(.065,.15,4),bladeMat);fpTip.position.set(.1,1.32,0);fpTip.rotation.z=.12;fpTip.renderOrder=35;fpSword.add(fpTip);
- const guard=new THREE.Mesh(new THREE.TorusGeometry(.16,.035,6,20),new THREE.MeshStandardMaterial({color:0xe9c777,metalness:.8,roughness:.22,depthTest:false}));guard.scale.set(1,.65,1);guard.position.y=.06;guard.renderOrder=36;fpSword.add(guard);
- const grip=new THREE.Mesh(new THREE.CylinderGeometry(.045,.052,.32,10),new THREE.MeshStandardMaterial({color:0x241b22,roughness:.78,depthTest:false}));grip.position.y=-.14;grip.renderOrder=36;fpSword.add(grip);
+ const fpGuard=new THREE.Mesh(new THREE.TorusGeometry(.16,.035,6,20),new THREE.MeshStandardMaterial({color:0xe9c777,metalness:.8,roughness:.22,depthTest:false}));fpGuard.scale.set(1,.65,1);fpGuard.position.y=.06;fpGuard.renderOrder=36;fpSword.add(fpGuard);
+ const fpGrip=new THREE.Mesh(new THREE.CylinderGeometry(.045,.052,.32,10),new THREE.MeshStandardMaterial({color:0x241b22,roughness:.78,depthTest:false}));fpGrip.position.y=-.14;fpGrip.renderOrder=36;fpSword.add(fpGrip);
  const wrap=new THREE.Mesh(new THREE.CylinderGeometry(.055,.055,.23,8),new THREE.MeshStandardMaterial({color:0x9a3349,roughness:.7,depthTest:false}));wrap.position.y=-.14;wrap.renderOrder=37;fpSword.add(wrap);
  fpSword.position.set(.46,-.38,-.86);fpSword.rotation.set(-.18,0,-.2);camera.add(fpSword);sword=fpSword;
  clock=new THREE.Clock();addEventListener('resize',resize);updateHud();renderer.setAnimationLoop(frame);
