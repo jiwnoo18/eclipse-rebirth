@@ -1,4 +1,4 @@
-import * as THREE from 'https://cdnjs.cloudflare.com/ajax/libs/three.js/0.161.0/three.module.min.js';
+import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.161.0/build/three.module.js';
 const $=id=>document.getElementById(id),canvas=$('world');
 let scene,camera,renderer,clock,hero,terrainMesh,sword,keys={},joy={x:0,y:0},mobs=[],xpOrbs=[],vfx=[],running=false,toastTimer,swing=0,abilityCooldown=0,abilityBuff=0,aim=new THREE.Vector3(0,0,-1);
 const p={x:0,z:0,hp:100,maxHp:100,mp:60,maxMp:60,xp:0,level:1,ess:0,form:'Awakened',path:'',rank:0,damage:25,speed:7};
