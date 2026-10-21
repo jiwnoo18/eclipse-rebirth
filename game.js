@@ -45,18 +45,22 @@ function init(){
  for(let i=0;i<25;i++)spawn((Math.random()-.5)*75,(Math.random()-.5)*75);
  // Camera-mounted forearm and polished fantasy sword for first-person view.
  // First-person weapon: camera-mounted, always in front of the scene.
- const fpArmMat=new THREE.MeshStandardMaterial({color:0x263750,roughness:.42,metalness:.35,emissive:0x081629});
- const fpArm=new THREE.Mesh(new THREE.CapsuleGeometry(.105,.43,5,10),fpArmMat);fpArm.position.set(.48,-.48,-.82);fpArm.rotation.z=-.48;fpArm.renderOrder=20;camera.add(fpArm);
- const fpCuff=new THREE.Mesh(new THREE.CylinderGeometry(.135,.12,.19,12),steel);fpCuff.position.set(.45,-.32,-.8);fpCuff.rotation.z=-.48;fpCuff.renderOrder=21;camera.add(fpCuff);
+ // Visible first-person armored hand and curved katana, attached to the camera.
+ const fpArmMat=new THREE.MeshStandardMaterial({color:0x202d45,roughness:.4,metalness:.42});
+ const fpArm=new THREE.Mesh(new THREE.CapsuleGeometry(.115,.48,5,10),fpArmMat);fpArm.position.set(.47,-.57,-.78);fpArm.rotation.z=-.42;fpArm.renderOrder=30;camera.add(fpArm);
+ const fpBracer=new THREE.Mesh(new THREE.BoxGeometry(.25,.34,.22),steel);fpBracer.position.set(.47,-.39,-.8);fpBracer.rotation.z=-.42;fpBracer.renderOrder=31;camera.add(fpBracer);
+ const fpHand=new THREE.Mesh(new THREE.SphereGeometry(.145,16,12),new THREE.MeshStandardMaterial({color:0x6b819d,metalness:.28,roughness:.52}));fpHand.position.set(.43,-.25,-.94);fpHand.scale.set(1,.82,1.15);fpHand.renderOrder=32;camera.add(fpHand);
+ const fpThumb=new THREE.Mesh(new THREE.CapsuleGeometry(.045,.13,4,8),new THREE.MeshStandardMaterial({color:0x8498b0,metalness:.25,roughness:.48}));fpThumb.position.set(.31,-.25,-.91);fpThumb.rotation.z=-.7;fpThumb.renderOrder=33;camera.add(fpThumb);
  const fpSword=new THREE.Group();
- const fpBladeMat=new THREE.MeshStandardMaterial({color:0xdaf8ff,metalness:.88,roughness:.14,emissive:0x159ddd,emissiveIntensity:1.15,depthTest:false});
- const fpBlade=new THREE.Mesh(new THREE.BoxGeometry(.105,1.08,.055),fpBladeMat);fpBlade.position.y=.57;fpBlade.renderOrder=22;fpSword.add(fpBlade);
- const fpEdge=new THREE.Mesh(new THREE.BoxGeometry(.022,.9,.022),new THREE.MeshBasicMaterial({color:0xffffff,depthTest:false}));fpEdge.position.set(-.056,.59,-.031);fpEdge.renderOrder=23;fpSword.add(fpEdge);
- const fpTip=new THREE.Mesh(new THREE.ConeGeometry(.075,.18,4),new THREE.MeshStandardMaterial({color:0xdaf8ff,metalness:.85,roughness:.18,depthTest:false}));fpTip.position.y=1.2;fpTip.renderOrder=23;fpSword.add(fpTip);
- const fpGuard=new THREE.Mesh(new THREE.BoxGeometry(.34,.065,.105),new THREE.MeshStandardMaterial({color:0xf0ce7a,metalness:.65,roughness:.24,depthTest:false}));fpGuard.position.y=.06;fpGuard.renderOrder=23;fpSword.add(fpGuard);
- const fpGrip=new THREE.Mesh(new THREE.CylinderGeometry(.04,.045,.29,10),new THREE.MeshStandardMaterial({color:0x503020,roughness:.72,depthTest:false}));fpGrip.position.y=-.12;fpGrip.renderOrder=23;fpSword.add(fpGrip);
- fpSword.position.set(.53,-.52,-.92);fpSword.rotation.set(-.12,0,-.22);camera.add(fpSword);sword=fpSword;
-
+ const bladeMat=new THREE.MeshStandardMaterial({color:0xe5fbff,metalness:.94,roughness:.12,emissive:0x1ab8ff,emissiveIntensity:1.45,side:THREE.DoubleSide,depthTest:false});
+ const bladeShape=new THREE.Shape();bladeShape.moveTo(-.055,0);bladeShape.lineTo(.055,0);bladeShape.lineTo(.09,.22);bladeShape.quadraticCurveTo(.18,.72,.12,1.22);bladeShape.lineTo(.035,1.34);bladeShape.quadraticCurveTo(.075,.78,0,.26);bladeShape.closePath();
+ const katanaBlade=new THREE.Mesh(new THREE.ShapeGeometry(bladeShape,12),bladeMat);katanaBlade.position.set(0,0,-.015);katanaBlade.renderOrder=34;fpSword.add(katanaBlade);
+ const spine=new THREE.Mesh(new THREE.BoxGeometry(.025,1.12,.025),new THREE.MeshBasicMaterial({color:0xffffff,depthTest:false}));spine.position.set(.045,.62,-.025);spine.renderOrder=35;fpSword.add(spine);
+ const tip=new THREE.Mesh(new THREE.ConeGeometry(.065,.15,4),bladeMat);tip.position.set(.1,1.32,0);tip.rotation.z=.12;tip.renderOrder=35;fpSword.add(tip);
+ const guard=new THREE.Mesh(new THREE.TorusGeometry(.16,.035,6,20),new THREE.MeshStandardMaterial({color:0xe9c777,metalness:.8,roughness:.22,depthTest:false}));guard.scale.set(1,.65,1);guard.position.y=.06;guard.renderOrder=36;fpSword.add(guard);
+ const grip=new THREE.Mesh(new THREE.CylinderGeometry(.045,.052,.32,10),new THREE.MeshStandardMaterial({color:0x241b22,roughness:.78,depthTest:false}));grip.position.y=-.14;grip.renderOrder=36;fpSword.add(grip);
+ const wrap=new THREE.Mesh(new THREE.CylinderGeometry(.055,.055,.23,8),new THREE.MeshStandardMaterial({color:0x9a3349,roughness:.7,depthTest:false}));wrap.position.y=-.14;wrap.renderOrder=37;fpSword.add(wrap);
+ fpSword.position.set(.46,-.38,-.86);fpSword.rotation.set(-.18,0,-.2);camera.add(fpSword);sword=fpSword;
  clock=new THREE.Clock();addEventListener('resize',resize);updateHud();renderer.setAnimationLoop(frame);
 }
 function spawn(x,z){
@@ -87,50 +91,24 @@ function dropXP(m){const count=Math.max(3,Math.ceil(m.k.xp/7));for(let i=0;i<cou
 function burstEffect(color,radius=5,count=28){
  const origin=new THREE.Vector3(p.x,height(p.x,p.z)+.9,p.z);
  const ring=new THREE.Mesh(new THREE.TorusGeometry(.7,.075,8,48),new THREE.MeshBasicMaterial({color,transparent:true,opacity:.95,depthWrite:false}));
- ring.rotation.x=Math.PI/2;ring.position.copy(origin);scene.add(ring);
- vfx.push({type:'ring',o:ring,life:.72,max:.72,radius});
+ ring.rotation.x=Math.PI/2;ring.position.copy(origin);scene.add(ring);vfx.push({type:'ring',o:ring,life:.72,max:.72,radius});
  const geo=new THREE.BufferGeometry(),arr=new Float32Array(count*3),vel=[];
  for(let i=0;i<count;i++){arr[i*3]=origin.x;arr[i*3+1]=origin.y;arr[i*3+2]=origin.z;const a=Math.random()*Math.PI*2,s=.9+Math.random()*radius*.8;vel.push(new THREE.Vector3(Math.cos(a)*s,1+Math.random()*4,Math.sin(a)*s))}
- geo.setAttribute('position',new THREE.BufferAttribute(arr,3));
- const pts=new THREE.Points(geo,new THREE.PointsMaterial({color,size:.16,transparent:true,opacity:1,blending:THREE.AdditiveBlending,depthWrite:false}));
- scene.add(pts);vfx.push({type:'particles',o:pts,vel,life:1,max:1});
+ geo.setAttribute('position',new THREE.BufferAttribute(arr,3));const pts=new THREE.Points(geo,new THREE.PointsMaterial({color,size:.22,transparent:true,opacity:1,blending:THREE.AdditiveBlending,depthWrite:false}));scene.add(pts);vfx.push({type:'particles',o:pts,vel,life:1,max:1});
+ // Camera-space slash and flash remain visible in first person.
+ const slash=new THREE.Mesh(new THREE.TorusGeometry(.56,.045,8,36,Math.PI*1.28),new THREE.MeshBasicMaterial({color,transparent:true,opacity:1,blending:THREE.AdditiveBlending,depthTest:false,depthWrite:false}));
+ slash.position.set(.18,-.02,-1.35);slash.rotation.set(.15,.05,-.9);slash.scale.set(1.55,.82,1);slash.renderOrder=100;camera.add(slash);vfx.push({type:'slash',o:slash,life:.32,max:.32,radius});
+ const flash=new THREE.Mesh(new THREE.PlaneGeometry(.65,.65),new THREE.MeshBasicMaterial({color,transparent:true,opacity:.72,blending:THREE.AdditiveBlending,depthTest:false,depthWrite:false}));
+ flash.position.set(.16,-.02,-1.28);flash.rotation.z=Math.random()*3;flash.renderOrder=101;camera.add(flash);vfx.push({type:'flash',o:flash,life:.16,max:.16,radius});
 }
 function updateEffects(dt){
  for(const f of [...vfx]){f.life-=dt;const t=1-Math.max(0,f.life)/f.max;
  if(f.type==='ring'){f.o.scale.setScalar(1+t*f.radius);f.o.material.opacity=Math.max(0,f.life/f.max)}
- else{const a=f.o.geometry.attributes.position;for(let i=0;i<f.vel.length;i++){a.array[i*3]+=f.vel[i].x*dt;a.array[i*3+1]+=f.vel[i].y*dt; a.array[i*3+2]+=f.vel[i].z*dt;f.vel[i].y-=5*dt}a.needsUpdate=true;f.o.material.opacity=Math.max(0,f.life/f.max)}
- if(f.life<=0){scene.remove(f.o);f.o.geometry?.dispose();f.o.material?.dispose();vfx=vfx.filter(q=>q!==f)}
+ else if(f.type==='particles'){const a=f.o.geometry.attributes.position;for(let i=0;i<f.vel.length;i++){a.array[i*3]+=f.vel[i].x*dt;a.array[i*3+1]+=f.vel[i].y*dt;a.array[i*3+2]+=f.vel[i].z*dt;f.vel[i].y-=5*dt}a.needsUpdate=true;f.o.material.opacity=Math.max(0,f.life/f.max)}
+ else if(f.type==='slash'){f.o.rotation.z=-.9+t*2.4;f.o.scale.set(1.55+t*1.1,.82+t*.4,1);f.o.material.opacity=Math.max(0,f.life/f.max)}
+ else if(f.type==='flash'){f.o.scale.setScalar(.5+t*1.8);f.o.material.opacity=Math.max(0,f.life/f.max)}
+ if(f.life<=0){if(f.o.parent)f.o.parent.remove(f.o);f.o.geometry?.dispose();if(Array.isArray(f.o.material))f.o.material.forEach(m=>m.dispose());else f.o.material?.dispose();vfx=vfx.filter(q=>q!==f)}
  }
-}
-function strike(skill=false){if(!running)return;swing=.42;burstEffect(skill?0x55dfff:0xe6f8ff,skill?6:2.5,skill?42:12);if(sword){sword.rotation.z=-1.35;sword.rotation.x=-.35}if(skill){if(p.mp<18){say('Not enough essence!');return}p.mp-=18}let hits=0;for(const m of mobs){if(m.dead||distance(m)>(skill?7:3.2))continue;m.hp-=p.damage*(skill?2.25:1)*(p.form==='Predator'?1.3:1);hits++;if(m.hp<=0){m.dead=true;dropXP(m);m.b.material.emissive?.setHex(0x7af5ff);say(m.k.name+' defeated — XP orbs dropped!')}}if(!hits)say(skill?'Eclipse Burst!':'Move closer to strike.');updateHud()}
-function useClassAbility(){
- if(!running)return;
- if(p.rank===0||!p.path){strike(true);return}
- if(abilityCooldown>0){say('Ability recharging: '+abilityCooldown.toFixed(1)+'s');return}
- const root=p.path==='demonpeer'||p.path==='demonking'?'demon':p.path==='archangel'||p.path==='seraph'?'angel':p.path==='saint'||p.path==='legend'?'hero':p.path==='phantom'||p.path==='deathstalker'?'assassin':p.path==='shadowmaster'||p.path==='shinobi'?'ninja':p.path;
- const power=p.rank>=3?1.8:p.rank===2?1.45:1;
- abilityCooldown=9;let hits=0;const classColor=({demon:0xff315f,angel:0x9fe8ff,hero:0xffd47a,assassin:0xb995ff,ninja:0x5be6c8}[root]||0x65efff);burstEffect(classColor,root==='demon'?9:root==='ninja'?7:5,root==='demon'?70:45);
- if(root==='demon'){
-  for(const m of mobs){if(!m.dead&&distance(m)<8){m.hp-=p.damage*2.4*power;hits++;if(m.hp<=0){m.dead=true;dropXP(m)}}}
-  say('INFERNAL NOVA — '+hits+' targets hit!');
- }else if(root==='angel'){
-  const heal=Math.round(p.maxHp*.28*power);p.hp=Math.min(p.maxHp,p.hp+heal);p.mp=Math.min(p.maxMp,p.mp+18*power);
-  for(const m of mobs){if(!m.dead&&distance(m)<6){m.hp-=p.damage*1.25*power;if(m.hp<=0){m.dead=true;dropXP(m)}}}
-  say('CELESTIAL GRACE — restored '+heal+' vitality');
- }else if(root==='hero'){
-  p.hp=Math.min(p.maxHp,p.hp+Math.round(p.maxHp*.2*power));abilityBuff=3.5;
-  for(const m of mobs){if(!m.dead&&distance(m)<5){m.hp-=p.damage*1.8*power;if(m.hp<=0){m.dead=true;dropXP(m)}}}
-  say('HEROIC AEGIS — healing and guard!');
- }else if(root==='assassin'){
-  const fx=Math.sin(yaw),fz=Math.cos(yaw);p.x+=fx*7*power;p.z+=fz*7*power;
-  for(const m of mobs){if(!m.dead&&distance(m)<5){m.hp-=p.damage*3.2*power;hits++;if(m.hp<=0){m.dead=true;dropXP(m)}}}
-  say('PHANTOM STEP — dash strike!');
- }else if(root==='ninja'){
-  const fx=Math.sin(yaw),fz=Math.cos(yaw);p.x+=fx*10*power;p.z+=fz*10*power;
-  for(const m of mobs){if(!m.dead&&distance(m)<6){m.hp-=p.damage*2.1*power;hits++;if(m.hp<=0){m.dead=true;dropXP(m)}}}
-  say('SHADOW SHIFT — vanish and reappear!');
- }
- updateHud();
 }
 function absorb(){const m=mobs.filter(q=>q.dead).sort((a,b)=>distance(a)-distance(b))[0];if(!m||distance(m)>4.5){say('Move closer to a defeated monster.');return}p.ess+=m.k.ess;p.mp=Math.min(p.maxMp,p.mp+8);scene.remove(m.g);mobs=mobs.filter(q=>q!==m);say('Absorbed '+m.k.name+' · +'+m.k.ess+' essence. Collect the shiny XP orbs!');if(p.ess>=35){renderEvolutions();$('evoPanel').classList.remove('hidden')}$('message').textContent='Absorption complete. Keep hunting to evolve.';updateHud()}
 const evolution={
@@ -158,11 +136,14 @@ $('attack').onclick=()=>strike();$('skill').onclick=()=>useClassAbility();$('abs
 $('play').onclick=()=>{$('start').classList.add('hidden');running=true;say('First-person hunt begins. WASD to move; drag to look.')};
 addEventListener('keydown',e=>{const k=e.key.toLowerCase();keys[k]=true;if([' ','arrowup','arrowdown','arrowleft','arrowright'].includes(k))e.preventDefault();if(e.repeat)return;if(k===' ')strike();if(k==='e')absorb();if(k==='q')useClassAbility();if(k==='escape')$('evoPanel').classList.add('hidden')});addEventListener('keyup',e=>keys[e.key.toLowerCase()]=false);
 
-let lookPointer=null,lastLookX=0,lastLookY=0,yaw=Math.PI,pitch=0;
-function applyLook(dx,dy){yaw-=dx*.0032;pitch=THREE.MathUtils.clamp(pitch-dy*.0027,-1.15,1.15);aim.set(Math.sin(yaw)*Math.cos(pitch),Math.sin(pitch),Math.cos(yaw)*Math.cos(pitch));}
-canvas.addEventListener('click',()=>{if(!running)return;if(document.pointerLockElement!==canvas&&canvas.requestPointerLock){const request=canvas.requestPointerLock();if(request&&request.catch)request.catch(()=>{})}});
-document.addEventListener('mousemove',e=>{if(document.pointerLockElement===canvas){applyLook(e.movementX||0,e.movementY||0);return}if(lookPointer!==null){applyLook(e.clientX-lastLookX,e.clientY-lastLookY);lastLookX=e.clientX;lastLookY=e.clientY}});
-canvas.addEventListener('pointerdown',e=>{if(e.pointerType==='mouse'){if(e.button!==0)return;if(document.pointerLockElement===canvas)return;lookPointer=e.pointerId;lastLookX=e.clientX;lastLookY=e.clientY;}else{lookPointer=e.pointerId;lastLookX=e.clientX;lastLookY=e.clientY;if(canvas.setPointerCapture)canvas.setPointerCapture(e.pointerId)}});
+let lookPointer=null,lastLookX=0,lastLookY=0,yaw=Math.PI,pitch=0,mouseHeld=false;
+function applyLook(dx,dy){yaw-=dx*.003;pitch=THREE.MathUtils.clamp(pitch-dy*.0026,-1.15,1.15);aim.set(Math.sin(yaw)*Math.cos(pitch),Math.sin(pitch),Math.cos(yaw)*Math.cos(pitch));}
+function requestLookLock(){if(!running||!canvas.requestPointerLock)return;try{const q=canvas.requestPointerLock();if(q&&q.catch)q.catch(()=>{})}catch(e){}}
+canvas.addEventListener('click',requestLookLock);
+canvas.addEventListener('mousedown',e=>{if(e.button===0){mouseHeld=true;lastLookX=e.clientX;lastLookY=e.clientY;requestLookLock()}});
+document.addEventListener('mouseup',()=>{mouseHeld=false;lookPointer=null});
+document.addEventListener('mousemove',e=>{if(document.pointerLockElement===canvas){applyLook(e.movementX||0,e.movementY||0);return}if(mouseHeld){applyLook(e.clientX-lastLookX,e.clientY-lastLookY);lastLookX=e.clientX;lastLookY=e.clientY}});
+canvas.addEventListener('pointerdown',e=>{if(e.pointerType!=='mouse'){lookPointer=e.pointerId;lastLookX=e.clientX;lastLookY=e.clientY;if(canvas.setPointerCapture)canvas.setPointerCapture(e.pointerId)}});
 canvas.addEventListener('pointermove',e=>{if(e.pointerType==='mouse'||lookPointer!==e.pointerId||document.pointerLockElement===canvas)return;const dx=e.clientX-lastLookX,dy=e.clientY-lastLookY;lastLookX=e.clientX;lastLookY=e.clientY;applyLook(dx,dy)});
 function endLook(e){if(lookPointer===e.pointerId)lookPointer=null}
 canvas.addEventListener('pointerup',endLook);canvas.addEventListener('pointercancel',endLook);
